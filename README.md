@@ -28,6 +28,16 @@ the same abuse, polite clients keep a latency close to what they get on an idle 
 the aggressive client is slowed down, not cut off. It keeps being served, with zero errors,
 taking about half of the capacity instead of nearly all of it.
 
+> [!IMPORTANT]
+> **The server in this benchmark is slow on purpose.** The test applications don't do any
+> real work: every request just sleeps or burns CPU for a random 300–2000 ms (or 40–60 ms
+> in the flood scenarios), on a single worker. That's deliberate. Fair queuing only matters
+> when there's more demand than capacity, so the setup makes capacity scarce and easy to
+> exhaust, to see how each queue shares it out once one client asks for far more than its
+> share. The absolute numbers (a few requests per second, latencies in seconds) describe
+> this artificial server, not Granian's performance; what matters is how the configurations
+> compare with each other and with the no-spammer baseline.
+
 ## Results
 
 Each scenario has a few polite clients and one aggressive client (the *spammer*) on a single
@@ -138,6 +148,9 @@ Baselines: polite p50 149–153 ms at about 20 req/s. Under FIFO the polite clie
   lane being the event loop.
 
 ### Applications
+
+All three are deliberately slow stand-ins for expensive views (rendering, queries, model
+calls), so that a single worker saturates with a handful of clients. They do no useful work.
 
 * `app.py` (WSGI): sleeps for a random 300–2000 ms, holding its pool thread, then returns a
   small body.
